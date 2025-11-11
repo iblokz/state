@@ -1,9 +1,10 @@
 # iblokz-state
 
-[![npm version](https://badge.fury.io/js/iblokz-state.svg)](https://badge.fury.io/js/iblokz-state)
+[![npm version](https://img.shields.io/npm/v/iblokz-state.svg)](https://www.npmjs.com/package/iblokz-state)
 [![CI](https://github.com/iblokz/state/workflows/CI/badge.svg)](https://github.com/iblokz/state/actions)
-[![codecov](https://codecov.io/gh/iblokz/state/graph/badge.svg)](https://codecov.io/gh/iblokz/state)
+[![codecov](https://codecov.io/gh/iblokz/state/branch/master/graph/badge.svg)](https://codecov.io/gh/iblokz/state)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.12.0-brightgreen)](https://nodejs.org/)
 
 A lightweight, RxJS-based state management library for JavaScript applications with DOM event integration.
 
@@ -349,7 +350,7 @@ pnpm version patch   # or minor, or major
 # GitHub Actions then:
 # - Runs CI tests
 # - Creates GitHub Release
-# - Publishes to npm
+# - Publishes to npm (if NPM_TOKEN is configured)
 ```
 
 ## Contributing
