@@ -17,6 +17,8 @@ A lightweight, RxJS-based state management library for JavaScript applications w
 
 ## Installation
 
+**Requirements:** Node.js ≥ 18.12.0
+
 ```bash
 npm install iblokz-state
 # or

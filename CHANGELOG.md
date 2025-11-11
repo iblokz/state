@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2025-11-11
+
+### Fixed
+- Updated Node.js requirement to >=18.12.0 for pnpm 9 compatibility
+- Removed Node 16 from CI matrix (EOL)
+- Added clear Node.js version requirement to README
+
 ## [1.0.0] - 2025-11-11
 
 ### Added
