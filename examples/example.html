@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>iblokz-state Example</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			max-width: 600px;
+			margin: 50px auto;
+			padding: 20px;
+		}
+		.counter {
+			background: #f0f0f0;
+			padding: 20px;
+			border-radius: 8px;
+			margin: 20px 0;
+		}
+		button {
+			padding: 10px 20px;
+			margin: 5px;
+			font-size: 16px;
+			cursor: pointer;
+		}
+		.state-display {
+			background: #fff;
+			padding: 15px;
+			border: 1px solid #ddd;
+			border-radius: 4px;
+			margin-top: 20px;
+		}
+		pre {
+			background: #282c34;
+			color: #abb2bf;
+			padding: 15px;
+			border-radius: 4px;
+			overflow-x: auto;
+		}
+	</style>
+</head>
+<body>
+	<h1>iblokz-state Example</h1>
+	<p>Event-driven state management with RxJS</p>
+
+	<div class="counter">
+		<h2>Counter: <span id="count">0</span></h2>
+		<button id="increment">Increment</button>
+		<button id="decrement">Decrement</button>
+		<button id="reset">Reset</button>
+	</div>
+
+	<div class="state-display">
+		<h3>Current State:</h3>
+		<pre id="state-output">{}</pre>
+	</div>
+
+	<script type="module">
+		import { init, dispatch } from '../index.js';
+
+		// Define reducer functions
+		const increment = state => ({...state, count: state.count + 1});
+		const decrement = state => ({...state, count: state.count - 1});
+		const reset = state => ({...state, count: 0});
+
+		// Initialize state
+		const state$ = init({ 
+			count: 0,
+			lastAction: null,
+			timestamp: Date.now()
+		});
+
+		// Subscribe to state changes and update UI
+		state$.subscribe(state => {
+			document.getElementById('count').textContent = state.count;
+			document.getElementById('state-output').textContent = 
+				JSON.stringify(state, null, 2);
+		});
+
+		// Wire up buttons
+		document.getElementById('increment').addEventListener('click', () => {
+			dispatch(state => ({
+				...increment(state),
+				lastAction: 'increment',
+				timestamp: Date.now()
+			}));
+		});
+
+		document.getElementById('decrement').addEventListener('click', () => {
+			dispatch(state => ({
+				...decrement(state),
+				lastAction: 'decrement',
+				timestamp: Date.now()
+			}));
+		});
+
+		document.getElementById('reset').addEventListener('click', () => {
+			dispatch(state => ({
+				...reset(state),
+				lastAction: 'reset',
+				timestamp: Date.now()
+			}));
+		});
+	</script>
+</body>
+</html>
+
