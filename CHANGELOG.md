@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2025-01-12
+
+### Added
+- **Action Tree Pattern**: New `adapt()` function for auto-dispatching action trees
+- **Dynamic Modules**: New `attach()` function for runtime module attachment
+- **Convenience Function**: New `createState()` for one-call initialization
+- **iblokz-data Integration**: Added dependency for immutable operations
+- **Action Stream**: Metadata emission for all action calls
+- **Async Support**: Promise handling in action functions
+- **Interactive Examples**: 
+  - `examples/with-adapt.html` - Action tree pattern demo
+  - `examples/with-attach.html` - Dynamic module attachment demo
+- **Comprehensive Tests**: 27 tests with 98.95% coverage
+- **TypeScript Definitions**: Full type support for new functions
+- **Documentation**: Detailed patterns and use cases in README
+
+### Changed
+- Updated keywords to include `iblokz`, `iblokz-data`, `action-tree`
+- Enhanced README with action tree and attach patterns
+- Updated build configuration to externalize `iblokz-data`
+
 ## [1.0.1] - 2025-11-11
 
 ### Fixed
