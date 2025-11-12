@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      iblokz-data:
+        specifier: ^1.6.0
+        version: 1.6.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.2
@@ -846,6 +849,9 @@ packages:
     resolution: {integrity: sha512-+dQSyqPh4x1hlO1swXBiNb2HzTDN1I2IGLQx1GrBuiqFJfoMrnZWwVmatvSiO+Iz8fBUnf+lekwNo4c2LlXItg==}
     engines: {node: '>=14'}
     hasBin: true
+
+  iblokz-data@1.6.0:
+    resolution: {integrity: sha512-et1dywi4DKKnhjpWvXg06bnvrsN+ajP6GKRPr4zcZy2kOv7kocOTWkRv81NWPwutJIqsDPx3VGXR7V0SIUHEhA==}
 
   iconv-lite@0.6.3:
     resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==}
@@ -2313,6 +2319,8 @@ snapshots:
       - supports-color
 
   husky@8.0.3: {}
+
+  iblokz-data@1.6.0: {}
 
   iconv-lite@0.6.3:
     dependencies:

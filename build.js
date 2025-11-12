@@ -22,7 +22,7 @@ try {
 		platform: 'node',
 		format: 'cjs',
 		outfile: 'dist/index.cjs',
-		external: ['rxjs'],
+		external: ['rxjs', 'iblokz-data'],
 		banner: {
 			js: `/**
  * iblokz-state v${pkg.version}
@@ -42,7 +42,7 @@ try {
 		platform: 'browser',
 		format: 'esm',
 		outfile: 'dist/index.browser.js',
-		external: ['rxjs'],
+		external: ['rxjs', 'iblokz-data'],
 		banner: {
 			js: `/**
  * iblokz-state v${pkg.version}

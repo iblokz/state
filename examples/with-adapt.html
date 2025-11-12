@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iblokz-state - Action Tree (Adapt) Example</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .counter {
+            font-size: 48px;
+            font-weight: bold;
+            color: #2196F3;
+            text-align: center;
+            margin: 30px 0;
+        }
+        .nested-value {
+            font-size: 24px;
+            color: #4CAF50;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #2196F3;
+            color: white;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #1976D2;
+        }
+        button.secondary {
+            background: #4CAF50;
+        }
+        button.secondary:hover {
+            background: #388E3C;
+        }
+        button.danger {
+            background: #f44336;
+        }
+        button.danger:hover {
+            background: #d32f2f;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #1976D2;
+        }
+        .state-display {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌳 Action Tree (Adapt) Example</h1>
+        <p class="subtitle">Using iblokz-state's adapt utility for auto-dispatching action trees</p>
+
+        <div class="counter" id="counter">0</div>
+        <div class="nested-value">Nested value: <span id="nested">0</span></div>
+
+        <div class="controls">
+            <button id="increment">Increment</button>
+            <button id="decrement">Decrement</button>
+            <button id="add5">Add 5</button>
+            <button class="secondary" id="setNested">Set Nested (Random)</button>
+            <button class="danger" id="reset">Reset</button>
+        </div>
+
+        <div class="info">
+            <strong>Pattern:</strong> Actions are organized in a tree with <code>initial</code> state
+            and reducer functions. The <code>adapt()</code> utility automatically wires them to dispatch.
+        </div>
+
+        <div class="state-display" id="state"></div>
+    </div>
+
+    <script type="module">
+        import { createState } from '../index.js';
+
+        // Define action tree (jam-station pattern)
+        const actions = {
+            // Root initial state
+            initial: {
+                count: 0,
+            },
+
+            // Root actions
+            increment: () => state => ({ ...state, count: state.count + 1 }),
+            decrement: () => state => ({ ...state, count: state.count - 1 }),
+            add: (n) => state => ({ ...state, count: state.count + n }),
+            reset: () => state => ({ ...state, count: 0, nested: { value: 0 } }),
+
+            // Nested module
+            nested: {
+                initial: {
+                    value: 0,
+                },
+                setValue: (val) => state => ({
+                    ...state,
+                    nested: { value: val }
+                }),
+            },
+        };
+
+        // Create adapted actions and state
+        const { actions: acts, state$ } = createState(actions);
+
+        // Subscribe to state changes and update UI
+        state$.subscribe(state => {
+            document.getElementById('counter').textContent = state.count;
+            document.getElementById('nested').textContent = state.nested.value;
+            document.getElementById('state').textContent = JSON.stringify(state, null, 2);
+        });
+
+        // Wire up buttons to auto-dispatching methods
+        document.getElementById('increment').onclick = () => acts.increment();
+        document.getElementById('decrement').onclick = () => acts.decrement();
+        document.getElementById('add5').onclick = () => acts.add(5);
+        document.getElementById('setNested').onclick = () => 
+            acts.nested.setValue(Math.floor(Math.random() * 100));
+        document.getElementById('reset').onclick = () => acts.reset();
+
+        // Log action metadata
+        acts.stream.subscribe(event => {
+            console.log('Action:', event.path.join('.'), 'Payload:', event.payload);
+        });
+    </script>
+</body>
+</html>
+

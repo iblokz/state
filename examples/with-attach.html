@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iblokz-state - Attach Pattern Example</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+        .section h3 {
+            margin-top: 0;
+            color: #2196F3;
+        }
+        .counter {
+            font-size: 36px;
+            font-weight: bold;
+            color: #2196F3;
+            text-align: center;
+            margin: 15px 0;
+        }
+        .user-info {
+            font-size: 24px;
+            color: #4CAF50;
+            text-align: center;
+            margin: 15px 0;
+        }
+        .settings-info {
+            font-size: 18px;
+            color: #FF9800;
+            text-align: center;
+            margin: 15px 0;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 14px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #2196F3;
+            color: white;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #1976D2;
+        }
+        button.secondary {
+            background: #4CAF50;
+        }
+        button.secondary:hover {
+            background: #388E3C;
+        }
+        button.tertiary {
+            background: #FF9800;
+        }
+        button.tertiary:hover {
+            background: #F57C00;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #1976D2;
+        }
+        .state-display {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .module-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .badge-base {
+            background: #2196F3;
+            color: white;
+        }
+        .badge-user {
+            background: #4CAF50;
+            color: white;
+        }
+        .badge-settings {
+            background: #FF9800;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 Attach Pattern Example</h1>
+        <p class="subtitle">Dynamically attaching action modules to an existing action tree</p>
+
+        <div class="section">
+            <h3>Base Module <span class="module-badge badge-base">BASE</span></h3>
+            <div class="counter" id="counter">0</div>
+            <div class="controls">
+                <button id="increment">Increment</button>
+                <button id="decrement">Decrement</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>User Module <span class="module-badge badge-user">ATTACHED</span></h3>
+            <div class="user-info">User: <span id="user">Not loaded</span></div>
+            <div class="controls">
+                <button class="secondary" id="attachUser">Attach User Module</button>
+                <button class="secondary" id="setName" disabled>Set Random Name</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Settings Module <span class="module-badge badge-settings">ATTACHED</span></h3>
+            <div class="settings-info">Theme: <span id="theme">Not loaded</span></div>
+            <div class="controls">
+                <button class="tertiary" id="attachSettings">Attach Settings Module</button>
+                <button class="tertiary" id="toggleTheme" disabled>Toggle Theme</button>
+            </div>
+        </div>
+
+        <div class="info">
+            <strong>Pattern:</strong> Start with a base action tree, then dynamically attach new modules
+            using <code>attach()</code>. This is useful for plugin systems, lazy-loading features, or
+            modular architecture where services add their own state branches.
+        </div>
+
+        <div class="state-display" id="state"></div>
+    </div>
+
+    <script type="module">
+        import { adapt, attach, init } from '../index.js';
+
+        const names = ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve', 'Frank'];
+        
+        // Base action tree
+        const baseActions = {
+            initial: { count: 0 },
+            increment: () => state => ({ ...state, count: state.count + 1 }),
+            decrement: () => state => ({ ...state, count: state.count - 1 }),
+        };
+
+        // User module (to be attached later)
+        const userModule = {
+            initial: { name: 'Guest', email: 'guest@example.com' },
+            setName: (name) => state => ({
+                ...state,
+                user: { ...state.user, name }
+            }),
+            setEmail: (email) => state => ({
+                ...state,
+                user: { ...state.user, email }
+            }),
+        };
+
+        // Settings module (to be attached later)
+        const settingsModule = {
+            initial: { theme: 'light', notifications: true },
+            setTheme: (theme) => state => ({
+                ...state,
+                settings: { ...state.settings, theme }
+            }),
+            toggleNotifications: () => state => ({
+                ...state,
+                settings: { ...state.settings, notifications: !state.settings.notifications }
+            }),
+        };
+
+        // Start with base actions
+        let actions = adapt(baseActions);
+        const state$ = init(actions.initial);
+
+        // Subscribe to state changes
+        state$.subscribe(state => {
+            document.getElementById('counter').textContent = state.count;
+            document.getElementById('user').textContent = 
+                state.user ? `${state.user.name} (${state.user.email})` : 'Not loaded';
+            document.getElementById('theme').textContent = 
+                state.settings ? `${state.settings.theme} (notifications: ${state.settings.notifications})` : 'Not loaded';
+            document.getElementById('state').textContent = JSON.stringify(state, null, 2);
+        });
+
+        // Log actions
+        actions.stream.subscribe(event => {
+            console.log('Action:', event.path.join('.'), 'Payload:', event.payload);
+        });
+
+        // Base module controls
+        document.getElementById('increment').onclick = () => actions.increment();
+        document.getElementById('decrement').onclick = () => actions.decrement();
+
+        // Attach user module
+        document.getElementById('attachUser').onclick = () => {
+            actions = attach(actions, ['user'], userModule);
+            
+            // Update state$ with new initial
+            state$.next(state => ({ ...state, ...actions.initial }));
+            
+            // Enable user controls
+            document.getElementById('setName').disabled = false;
+            document.getElementById('attachUser').disabled = true;
+            
+            console.log('✅ User module attached!');
+        };
+
+        document.getElementById('setName').onclick = () => {
+            const randomName = names[Math.floor(Math.random() * names.length)];
+            actions.user.setName(randomName);
+        };
+
+        // Attach settings module
+        document.getElementById('attachSettings').onclick = () => {
+            actions = attach(actions, ['settings'], settingsModule);
+            
+            // Update state$ with new initial
+            state$.next(state => ({ ...state, ...actions.initial }));
+            
+            // Enable settings controls
+            document.getElementById('toggleTheme').disabled = false;
+            document.getElementById('attachSettings').disabled = true;
+            
+            console.log('✅ Settings module attached!');
+        };
+
+        document.getElementById('toggleTheme').onclick = () => {
+            const currentTheme = state$.getValue().settings.theme;
+            actions.settings.setTheme(currentTheme === 'light' ? 'dark' : 'light');
+        };
+    </script>
+</body>
+</html>
+

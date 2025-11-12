@@ -2,7 +2,7 @@
  * TypeScript definitions for iblokz-state
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 /**
  * Dispatch a state change via DOM custom event
@@ -57,4 +57,52 @@ export namespace storage {
 		set(key: string, value: any): void;
 	} | null;
 }
+
+/**
+ * Action metadata emitted by adapted actions
+ */
+export interface ActionEvent {
+	path: string[];
+	payload: any[];
+	reducer: (state: any) => any;
+}
+
+/**
+ * Adapted action tree with auto-dispatching methods
+ */
+export interface AdaptedActions<T = any> {
+	initial: T;
+	stream: Subject<ActionEvent>;
+	[key: string]: any;
+}
+
+/**
+ * Adapt an action tree to auto-dispatch on method calls
+ */
+export function adapt<T = any>(
+	tree: any,
+	namespace?: string,
+	path?: string[]
+): AdaptedActions<T>;
+
+/**
+ * Attach a new action branch to an existing adapted tree
+ */
+export function attach<T = any>(
+	tree: AdaptedActions<any>,
+	path: string[] | string,
+	node: any
+): AdaptedActions<T>;
+
+/**
+ * Create adapted actions and initialize state in one call
+ */
+export function createState<T = any>(
+	tree: any,
+	namespace?: string,
+	storage?: Storage | null
+): {
+	actions: AdaptedActions<T>;
+	state$: BehaviorSubject<T>;
+};
 

@@ -8,12 +8,17 @@
 
 A lightweight, RxJS-based state management library for JavaScript applications with DOM event integration.
 
+Part of the **iblokz** family of functional utilities, designed to work seamlessly with [iblokz-data](https://github.com/iblokz/data).
+
 ## Features
 
+- 🌳 **Action Tree Pattern** - Auto-dispatching action trees for organized, scalable state management
 - 🎯 **Event-driven** - Uses DOM events for cross-component/microfrontend communication
 - 🔒 **Immutable updates** - State changes through pure reducer functions
 - 📡 **RxJS powered** - Built on RxJS observables for powerful reactive patterns
+- 💾 **Storage persistence** - Optional localStorage/sessionStorage integration
 - 🌐 **Microfrontend ready** - Perfect for distributed applications using localStorage and DOM events
+- 🔧 **iblokz-data integration** - Built on proven immutable data utilities
 - ✅ **Well-tested** - Comprehensive test coverage
 
 ## Installation
@@ -149,32 +154,136 @@ subscription.unsubscribe();
 
 ## Patterns
 
-### Reducer Functions
+### Action Tree Pattern (Recommended)
 
-State changes are applied through reducer functions that take the current state and return a new state:
+The **action tree pattern** is the most convenient way to organize complex state management. It allows you to define your state and actions in a nested tree structure, which then gets automatically wired to dispatch.
 
 ```javascript
-// Simple increment
-const increment = state => ({ ...state, count: state.count + 1 });
+import { createState } from 'iblokz-state';
 
-// Nested update
-const updateUser = (name) => state => ({
-  ...state,
-  user: { ...state.user, name }
+// Define action tree with initial state and reducers
+const actions = {
+  // Root initial state
+  initial: {
+    count: 0,
+  },
+
+  // Root actions (functions that return reducers)
+  increment: () => state => ({ ...state, count: state.count + 1 }),
+  decrement: () => state => ({ ...state, count: state.count - 1 }),
+  add: (n) => state => ({ ...state, count: state.count + n }),
+  
+  // Nested modules
+  user: {
+    initial: {
+      name: 'Guest',
+      age: 0
+    },
+    setName: (name) => state => ({
+      ...state,
+      user: { ...state.user, name }
+    }),
+    setAge: (age) => state => ({
+      ...state,
+      user: { ...state.user, age }
+    })
+  }
+};
+
+// Create adapted actions and state
+const { actions: acts, state$ } = createState(actions);
+
+// Subscribe to state changes
+state$.subscribe(state => console.log(state));
+// Initial: { count: 0, user: { name: 'Guest', age: 0 } }
+
+// Call actions (automatically dispatches!)
+acts.increment();          // { count: 1, ... }
+acts.add(5);              // { count: 6, ... }
+acts.user.setName('Bob'); // { ..., user: { name: 'Bob', age: 0 } }
+
+// Monitor action calls
+acts.stream.subscribe(event => {
+  console.log('Action:', event.path.join('.'));
+  console.log('Args:', event.payload);
 });
-
-// Array operations
-const addItem = (item) => state => ({
-  ...state,
-  items: [...state.items, item]
-});
-
-store.dispatch(increment);
-store.dispatch(updateUser('Alice'));
-store.dispatch(addItem({ id: 1, text: 'New item' }));
 ```
 
-### Organizing State Changes
+**Benefits:**
+- ✨ Auto-dispatching methods (no manual `dispatch` calls)
+- 🌳 Nested organization matching your state structure  
+- 📡 Action stream for logging/debugging
+- 🔄 Async/Promise support out of the box
+- 📦 Combines initial state and actions in one place
+
+**With localStorage:**
+
+```javascript
+const { actions, state$ } = createState(
+  actionTree,
+  'my.app.state',
+  localStorage  // Persist to localStorage
+);
+```
+
+### Attaching Modules Dynamically
+
+For plugin systems or lazy-loaded features, use `attach()` to add action branches after initialization:
+
+```javascript
+import { adapt, attach } from 'iblokz-state';
+
+// Start with base actions
+let actions = adapt({
+  initial: { count: 0 },
+  increment: () => state => ({ ...state, count: state.count + 1 })
+});
+
+// Later, attach a user module (e.g., after login)
+const userModule = {
+  initial: { name: 'Guest', email: '' },
+  setName: (name) => state => ({
+    ...state,
+    user: { ...state.user, name }
+  })
+};
+
+actions = attach(actions, ['user'], userModule);
+// Now: actions.user.setName('Alice') works!
+
+// Can also use dot notation
+actions = attach(actions, 'settings', settingsModule);
+```
+
+**Use cases:**
+- 🔌 Plugin systems - Plugins add their own state branches
+- 📦 Lazy loading - Load feature modules on demand
+- 🎛️ Service-based architecture - Services register their own actions
+- 🧩 Modular apps - Each module manages its own state slice
+
+### Low-Level Pattern (Manual Dispatch)
+
+For simpler use cases or when you need more control, use the manual dispatch pattern:
+
+```javascript
+import { init, dispatch } from 'iblokz-state';
+
+// Initialize state
+const state$ = init({ count: 0 });
+
+// Define reducer functions
+const increment = state => ({ ...state, count: state.count + 1 });
+const add = (n) => state => ({ ...state, count: state.count + n });
+
+// Manually dispatch
+dispatch(increment);
+dispatch(add(5));
+
+// Subscribe to changes
+state$.subscribe(state => console.log(state));
+```
+
+### Organizing State Changes (Manual Pattern)
 
 ```javascript
 // state/index.js
@@ -188,12 +297,12 @@ export const decrement = state => ({ ...state, count: state.count - 1 });
 export const setUser = (name) => state => ({ ...state, user: { name } });
 
 // app.js
-import { createStore } from 'iblokz-state';
+import { init, dispatch } from 'iblokz-state';
 import { initial, increment, setUser } from './state';
 
-const store = createStore(initial);
-store.dispatch(increment);
-store.dispatch(setUser('John'));
+const state$ = init(initial);
+dispatch(increment);
+dispatch(setUser('John'));
 ```
 
 ### With UI Libraries
@@ -275,7 +384,9 @@ const value = storage.get(localStorage, 'my-key', defaultValue);
 
 Check out the `examples/` folder for interactive examples:
 
-- `examples/example.html` - Basic counter with state display
+- `examples/with-adapt.html` - **Action tree pattern** (recommended) - Auto-dispatching nested actions
+- `examples/with-attach.html` - **Attach pattern** - Dynamically attaching modules at runtime
+- `examples/example.html` - Basic counter with manual dispatch
 - `examples/with-storage.html` - Counter with localStorage persistence (survives page refresh!)
 
 To run the examples, serve the project with a local server:

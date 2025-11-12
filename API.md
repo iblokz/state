@@ -1,6 +1,9 @@
 ## Modules
 
 <dl>
+<dt><a href="#module_adapt">adapt</a></dt>
+<dd><p>Action tree adapter - converts action trees to auto-dispatching APIs</p>
+</dd>
 <dt><a href="#module_core">core</a></dt>
 <dd><p>State Machine</p>
 </dd>
@@ -9,6 +12,75 @@
 </dd>
 </dl>
 
+<a name="module_adapt"></a>
+
+## adapt
+Action tree adapter - converts action trees to auto-dispatching APIs
+
+
+* [adapt](#module_adapt)
+    * [.exports.adapt](#module_adapt.exports.adapt) ⇒ <code>Object</code>
+    * [.exports.createState](#module_adapt.exports.createState) ⇒ <code>Object</code>
+
+<a name="module_adapt.exports.adapt"></a>
+
+### adapt.exports.adapt ⇒ <code>Object</code>
+Adapt an action tree to auto-dispatch on method calls
+
+**Kind**: static constant of [<code>adapt</code>](#module_adapt)  
+**Returns**: <code>Object</code> - Adapted tree with stream, initial, and auto-dispatching methods  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| tree | <code>Object</code> |  | Action tree with initial state and reducer functions |
+| [namespace] | <code>string</code> | <code>&quot;&#x27;state.changes&#x27;&quot;</code> | Namespace for state changes |
+| [path] | <code>Array</code> | <code>[]</code> | Current path in tree (used internally) |
+
+**Example**  
+```js
+const actions = {
+  initial: { count: 0 },
+  increment: () => state => ({ ...state, count: state.count + 1 }),
+  add: (n) => state => ({ ...state, count: state.count + n }),
+  nested: {
+    initial: { value: 0 },
+    setValue: (val) => state => ({ ...state, nested: { value: val } })
+  }
+};
+
+const adapted = adapt(actions);
+// adapted.initial = { count: 0, nested: { value: 0 } }
+// adapted.stream - Subject that emits action metadata
+// adapted.increment() - auto-dispatches
+// adapted.nested.setValue(42) - auto-dispatches
+```
+<a name="module_adapt.exports.createState"></a>
+
+### adapt.exports.createState ⇒ <code>Object</code>
+Create adapted actions and initialize state in one call
+
+**Kind**: static constant of [<code>adapt</code>](#module_adapt)  
+**Returns**: <code>Object</code> - Object with actions (adapted tree) and state$ (BehaviorSubject)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| tree | <code>Object</code> |  | Action tree with initial state and reducer functions |
+| [namespace] | <code>string</code> | <code>&quot;&#x27;state.changes&#x27;&quot;</code> | Namespace for state changes |
+| [storage] | <code>Storage</code> \| <code>null</code> |  | localStorage, sessionStorage, or null |
+
+**Example**  
+```js
+import {createState} from 'iblokz-state/lib/adapt';
+
+const actions = {
+  initial: { count: 0 },
+  increment: () => state => ({ ...state, count: state.count + 1 })
+};
+
+const {actions: acts, state$} = createState(actions);
+state$.subscribe(state => console.log(state));
+acts.increment(); // dispatches and updates state
+```
 <a name="module_core"></a>
 
 ## core
