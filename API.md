@@ -20,6 +20,7 @@ Action tree adapter - converts action trees to auto-dispatching APIs
 
 * [adapt](#module_adapt)
     * [.exports.adapt](#module_adapt.exports.adapt) ⇒ <code>Object</code>
+    * [.exports.attach](#module_adapt.exports.attach) ⇒ <code>Object</code>
     * [.exports.createState](#module_adapt.exports.createState) ⇒ <code>Object</code>
 
 <a name="module_adapt.exports.adapt"></a>
@@ -53,6 +54,38 @@ const adapted = adapt(actions);
 // adapted.stream - Subject that emits action metadata
 // adapted.increment() - auto-dispatches
 // adapted.nested.setValue(42) - auto-dispatches
+```
+<a name="module_adapt.exports.attach"></a>
+
+### adapt.exports.attach ⇒ <code>Object</code>
+Attach a new action branch to an existing adapted tree
+
+**Kind**: static constant of [<code>adapt</code>](#module_adapt)  
+**Returns**: <code>Object</code> - New tree with attached node  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| tree | <code>Object</code> | Existing adapted action tree |
+| path | <code>Array</code> \| <code>string</code> | Path where to attach (array or dot notation) |
+| node | <code>Object</code> | New action node to attach |
+
+**Example**  
+```js
+import {adapt, attach} from 'iblokz-state/lib/adapt';
+
+const actions = adapt({
+  initial: { count: 0 },
+  increment: () => state => ({ ...state, count: state.count + 1 })
+});
+
+// Later, attach a new module
+const withUser = attach(actions, ['user'], {
+  initial: { name: 'Guest' },
+  setName: (name) => state => ({ ...state, user: { name } })
+});
+
+// Or using dot notation
+const withUser2 = attach(actions, 'user', {...});
 ```
 <a name="module_adapt.exports.createState"></a>
 

@@ -1,6 +1,6 @@
 {
   "name": "iblokz-state",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "lightweight state management utilities",
   "type": "module",
   "main": "./dist/index.cjs",
